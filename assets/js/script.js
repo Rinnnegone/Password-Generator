@@ -6,6 +6,7 @@ function generatePassword() {
   console.log("hey! you clicked me")
 
 // user prompt for password criteria
+
 // password length 8 - 128
 let passwordlength = 8;
 let passwordValue = '';
@@ -24,7 +25,7 @@ const createPassword = () => {
 }
 //display password to the page
 
-
+    
 
   return "Generate password will go here"
 }
