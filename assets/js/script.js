@@ -1,43 +1,147 @@
 
-// Get references to the #generate element
-var generateBtn = document.querySelector("#generate");
+function randomInt(min, max) {
 
-function generatePassword() {
-  console.log("hey! you clicked me")
-
-// user prompt for password criteria
-
-// password length 8 - 128
-let passwordlength = 8;
-let passwordValue = '';
-//lower case, upper case , numbers , special characters
-let characters = '01234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_+{}:"<>?|';
-// validate input
-const createPassword = () => {
-  passwordValue = '';
-
-  for (let i = 0; i < passwordlength; i++) {
-    let number = Math.floor(Math.random()* characters.length);
-    passwordValue += characters.substring(number, number + 1);
+  if (!max) {
+    max = min
+    min = 0
   }
 
-  password.value = passwordValue;
-}
-//display password to the page
-
-    
-
-  return "Generate password will go here"
+ 
+  let rand = Math.random()
+  return Math.floor(min*(1 - rand) + rand*max)
 }
 
-// Write password to the #password input
+
+function getRandomIndex(list) {
+  return list[randomInt(list.length)]
+}
+
+function promptUserForInputType(inputType, message, isValidCondition) {
+  let userInput = window.prompt(message)
+  let isValidType
+
+  let inputObject = {
+  
+    canceled: userInput === null
+  }
+
+
+  if (inputType === "number") {
+    userInput = parseInt(userInput)
+    isValidType = !isNaN(userInput)
+  }
+
+ 
+  inputObject.isValidType = isValidType
+  inputObject.value = userInput
+  inputObject.isValidCondition = isValidType && isValidCondition(userInput)
+
+  return inputObject
+}
+
+
+
+function newPasswordOption(name, generator) {
+  return {
+    name: name,
+    generate: generator,
+  }
+}
+
+
+
+
+function getRandomSymbol() {
+  return String.fromCharCode(randomInt(33, 47))
+}
+
+function getRandomNumber() {
+  return String.fromCharCode(randomInt(48, 57))
+}
+
+
+function getRandomLetterLower() {
+  return String.fromCharCode(randomInt(97, 122))
+}
+
+
+function getRandomLetterUpper() {
+  return getRandomLetterLower().toUpperCase()
+}
+
+function generatePassword(minLength, maxLength) {
+
+
+  let passwordLengthResult
+
+  while (true) {
+    passwordLengthResult = promptUserForInputType(
+      "number", 
+      "Enter a password length (between " + minLength + " and " + maxLength + " characters)", 
+      function(inputNumber) {
+        return inputNumber >= minLength && inputNumber <= maxLength
+      }
+    )
+
+    if (passwordLengthResult.canceled) return 
+
+
+    if (!passwordLengthResult.isValidType) {
+      window.alert("Please enter a valid number")
+
+   
+    } else if (!passwordLengthResult.isValidCondition) {
+      window.alert("Password length must be between " + minLength + " and " + maxLength + " characters")
+
+    } else {
+      break
+    }
+  }
+
+ 
+  let passwordOptions = [
+    newPasswordOption("uppercase letters", getRandomLetterUpper),
+    newPasswordOption("lowercase letters", getRandomLetterLower),
+    newPasswordOption("symbols", getRandomSymbol),
+    newPasswordOption("numbers", getRandomNumber),
+  ]
+
+ 
+  let selectedPasswordOptions = []
+
+  for (let i = 0; i < passwordOptions.length; i++) {
+    let option = passwordOptions[i]
+    let userConfirmed = window.confirm("Would you like to include " + option.name + " in your password?")
+
+ 
+    if (userConfirmed) selectedPasswordOptions.push(option)
+  }
+
+ 
+  if (selectedPasswordOptions.length === 0) {
+    let randomOption = getRandomIndex(passwordOptions)
+    window.alert("No specifications were given. Generating password with: " + randomOption.name)
+    selectedPasswordOptions.push(randomOption)
+  }
+
+  let passwordBuffer = ""
+  for (let i = 0; i < passwordLengthResult.value; i++) {
+    passwordBuffer += getRandomIndex(selectedPasswordOptions).generate()
+  }
+
+
+  return passwordBuffer
+}
+
+
 function writePassword() {
-  var password = generatePassword();
-  var passwordText = document.querySelector("#password");
+  let password = generatePassword(8, 128);
+  let passwordText = document.querySelector("#password");
 
-  passwordText.value = password;
-
+  if (password) passwordText.value = password;
 }
 
-// Add event listener to generate button
+let generateBtn = document.querySelector("#generate");
+
+// add "click" event to the generate button
 generateBtn.addEventListener("click", writePassword);
